@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Word Spin">
+  <title>Word Spin</title>
+
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231a1145'/%3E%3Ctext x='28' y='52' font-family='sans-serif' font-weight='700' font-size='22' fill='%23ffffff' opacity='0.12'%3EA%3C/text%3E%3Ctext x='140' y='48' font-family='sans-serif' font-weight='700' font-size='18' fill='%23ffffff' opacity='0.12'%3EZ%3C/text%3E%3Ctext x='14' y='110' font-family='sans-serif' font-weight='700' font-size='14' fill='%23ffffff' opacity='0.10'%3EQ%3C/text%3E%3Ctext x='148' y='115' font-family='sans-serif' font-weight='700' font-size='16' fill='%23ffffff' opacity='0.10'%3EM%3C/text%3E%3Crect x='18' y='52' width='66' height='76' rx='14' fill='%23534AB7'/%3E%3Crect x='21' y='55' width='60' height='70' rx='12' fill='%236359c9'/%3E%3Ctext x='51' y='108' font-family='sans-serif' font-weight='700' font-size='52' fill='%23ffffff' text-anchor='middle'%3EW%3C/text%3E%3Crect x='96' y='52' width='66' height='76' rx='14' fill='%230F6E56'/%3E%3Crect x='99' y='55' width='60' height='70' rx='12' fill='%231D9E75'/%3E%3Ctext x='129' y='108' font-family='sans-serif' font-weight='700' font-size='52' fill='%23ffffff' text-anchor='middle'%3ES%3C/text%3E%3Ccircle cx='90' cy='90' r='5' fill='%23f5c842'/%3E%3Ctext x='90' y='150' font-family='sans-serif' font-weight='700' font-size='13' fill='%23c4b8f0' text-anchor='middle' letter-spacing='1'%3EWORD SPIN%3C/text%3E%3C/svg%3E">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      height: 100%;
+      background: #1a1145;
+    }
+
+    body {
+      min-height: 100%;
+      min-height: -webkit-fill-available;
+      background: #1a1145;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      background: #1a1145;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .screen.active { display: flex; }
+
+    /* ── SCATTER LETTERS ── */
+    .scatter {
+      position: absolute;
+      font-weight: 700;
+      color: #ffffff;
+      opacity: 0.09;
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
+    }
+
+    /* ══════════════════════════════
+       HOW TO PLAY SCREEN
+    ══════════════════════════════ */
+    #howtoplay {
+      justify-content: flex-start;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .htp-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 28px 56px;
+      width: 100%;
+      z-index: 1;
+    }
+
+    .htp-logo {
+      font-size: 30px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .htp-tagline {
+      font-size: 13px;
+      color: #c4b8f0;
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+
+    .htp-tiles {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .htp-tile {
+      width: 72px;
+      height: 80px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .htp-tile.s { background: #6359c9; box-shadow: 0 0 0 2px #7b72d9; }
+    .htp-tile.e { background: #1D9E75; box-shadow: 0 0 0 2px #25b888; }
+
+    .htp-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #f5c842;
+    }
+
+    .htp-goal {
+      font-size: 15px;
+      color: #ffffff;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 320px;
+    }
+
+    .htp-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f5c842;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      align-self: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .htp-steps {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .htp-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .htp-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #6359c9;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .htp-step-text {
+      font-size: 14px;
+      color: #e0d9ff;
+      line-height: 1.6;
+    }
+
+    .htp-rules {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .htp-rule {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .htp-bullet {
+      color: #f5c842;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .htp-rule-text {
+      font-size: 14px;
+      color: #e0d9ff;
+      line-height: 1.6;
+    }
+
+    .htp-example {
+      width: 100%;
+      background: rgba(99, 89, 201, 0.25);
+      border: 1px solid rgba(99, 89, 201, 0.4);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 32px;
+    }
+
+    .htp-example-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f5c842;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .htp-example-text {
+      font-size: 14px;
+      color: #e0d9ff;
+      line-height: 1.6;
+    }
+
+    .htp-example-words {
+      font-size: 14px;
+      color: #4ec9a0;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .play-btn {
+      background: #f5c842;
+      color: #1a1145;
+      border: none;
+      border-radius: 50px;
+      padding: 15px 56px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      -webkit-appearance: none;
+      transition: transform 0.1s ease;
+    }
+    .play-btn:active { transform: scale(0.96); }
+
+    /* ══════════════════════════════
+       GAME SCREEN
+    ══════════════════════════════ */
+    #game {
+      justify-content: flex-start;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .game-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 56px 20px 56px;
+      width: 100%;
+      z-index: 1;
+    }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+
+    .how-link {
+      font-size: 12px;
+      font-weight: 600;
+      color: #c4b8f0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      border: none;
+      border-radius: 50px;
+      padding: 6px 14px;
+      -webkit-appearance: none;
+    }
+
+    .reels-row {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .slot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slot-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #c4b8f0;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .slot-window {
+      position: relative;
+      width: 120px;
+      height: 130px;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .slot-window.starts { background: #6359c9; box-shadow: 0 0 0 2px #7b72d9; }
+    .slot-window.ends   { background: #1D9E75; box-shadow: 0 0 0 2px #25b888; }
+
+    .fade-top { position: absolute; top: 0; left: 0; right: 0; height: 30px; z-index: 2; pointer-events: none; }
+    .fade-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 30px; z-index: 2; pointer-events: none; }
+
+    .starts .fade-top { background: linear-gradient(to bottom, #6359c9, transparent); }
+    .starts .fade-bot { background: linear-gradient(to top,    #6359c9, transparent); }
+    .ends   .fade-top { background: linear-gradient(to bottom, #1D9E75, transparent); }
+    .ends   .fade-bot { background: linear-gradient(to top,    #1D9E75, transparent); }
+
+    .reel {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .reel-letter {
+      width: 120px;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      font-weight: 700;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .connector { margin-top: 65px; }
+
+    .gold-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #f5c842;
+    }
+
+    .prompt {
+      font-size: 14px;
+      color: #f5c842;
+      text-align: center;
+      margin-top: 18px;
+      min-height: 22px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      max-width: 280px;
+      line-height: 1.5;
+    }
+
+    .timer-wrap {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .timer-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 50px;
+      overflow: hidden;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: #f5c842;
+      border-radius: 50px;
+      transition: width 1s linear, background 1s linear;
+    }
+
+    .timer-count {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f5c842;
+      letter-spacing: 0.04em;
+    }
+
+    .spin-btn {
+      margin-top: 20px;
+      background: #f5c842;
+      color: #1a1145;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 52px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+      -webkit-appearance: none;
+    }
+    .spin-btn:active  { transform: scale(0.96); }
+    .spin-btn:disabled { opacity: 0.45; cursor: default; }
+
+    .history {
+      margin-top: 24px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .history-title {
+      font-size: 11px;
+      color: #c4b8f0;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 10px;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .round-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 8px 14px;
+    }
+
+    .round-num {
+      font-size: 11px;
+      color: #8878c4;
+      font-weight: 600;
+      min-width: 24px;
+    }
+
+    .pill {
+      font-size: 14px;
+      font-weight: 700;
+      padding: 3px 13px;
+      border-radius: 50px;
+      color: #1a1145;
+    }
+    .pill.s { background: #9b94e8; }
+    .pill.e { background: #4ec9a0; }
+
+    .pill-arrow {
+      font-size: 13px;
+      color: #8878c4;
+    }
+
+    .round-label {
+      font-size: 12px;
+      color: #8878c4;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ HOW TO PLAY SCREEN ══ -->
+  <div class="screen active" id="howtoplay">
+    <span class="scatter" style="font-size:64px;top:20px;left:10px;">A</span>
+    <span class="scatter" style="font-size:48px;top:12px;right:16px;">Z</span>
+    <span class="scatter" style="font-size:32px;top:200px;left:4px;">Q</span>
+    <span class="scatter" style="font-size:42px;top:190px;right:6px;">M</span>
+    <span class="scatter" style="font-size:36px;bottom:80px;left:8px;">X</span>
+    <span class="scatter" style="font-size:30px;bottom:70px;right:10px;">B</span>
+
+    <div class="htp-inner">
+      <div class="htp-logo">Word Spin</div>
+      <div class="htp-tagline">spin the letters — find the word</div>
+
+      <div class="htp-tiles">
+        <div class="htp-tile s">W</div>
+        <div class="htp-dot"></div>
+        <div class="htp-tile e">S</div>
+      </div>
+
+      <p class="htp-goal">Race your friends to think of a word that starts with the first letter and ends with the second letter — before anyone else does!</p>
+
+      <div class="htp-section-title">How to play</div>
+      <div class="htp-steps">
+        <div class="htp-step">
+          <div class="htp-num">1</div>
+          <div class="htp-step-text">One player taps <strong style="color:#f5c842;">Spin</strong> to generate two random letters.</div>
+        </div>
+        <div class="htp-step">
+          <div class="htp-num">2</div>
+          <div class="htp-step-text">The <strong style="color:#9b94e8;">purple letter</strong> is your starting letter — your word must begin with it.</div>
+        </div>
+        <div class="htp-step">
+          <div class="htp-num">3</div>
+          <div class="htp-step-text">The <strong style="color:#4ec9a0;">green letter</strong> is your ending letter — your word must end with it.</div>
+        </div>
+        <div class="htp-step">
+          <div class="htp-num">4</div>
+          <div class="htp-step-text">A 20-second timer starts automatically. All players race to shout out a valid word!</div>
+        </div>
+        <div class="htp-step">
+          <div class="htp-num">5</div>
+          <div class="htp-step-text">The first player to call out a correct word wins the round. Spin again to keep playing!</div>
+        </div>
+      </div>
+
+      <div class="htp-section-title">Rules</div>
+      <div class="htp-rules">
+        <div class="htp-rule">
+          <div class="htp-bullet">—</div>
+          <div class="htp-rule-text">Words must be at least 3 letters long.</div>
+        </div>
+        <div class="htp-rule">
+          <div class="htp-bullet">—</div>
+          <div class="htp-rule-text">No proper nouns — names, places, or brands don't count.</div>
+        </div>
+        <div class="htp-rule">
+          <div class="htp-bullet">—</div>
+          <div class="htp-rule-text">If two players call out a word at the same time, spin again.</div>
+        </div>
+        <div class="htp-rule">
+          <div class="htp-bullet">—</div>
+          <div class="htp-rule-text">If no one finds a word before the timer runs out, the round is a draw — spin again.</div>
+        </div>
+      </div>
+
+      <div class="htp-example">
+        <div class="htp-example-label">Example</div>
+        <div class="htp-example-text">If the letters are <strong style="color:#9b94e8;">B</strong> and <strong style="color:#4ec9a0;">T</strong>, valid answers could include:</div>
+        <div class="htp-example-words">boat, best, brought, bracket</div>
+      </div>
+
+      <button class="play-btn" onclick="showGame()">Let's Play!</button>
+    </div>
+  </div>
+
+  <!-- ══ GAME SCREEN ══ -->
+  <div class="screen" id="game">
+    <span class="scatter" style="font-size:64px;top:24px;left:12px;">A</span>
+    <span class="scatter" style="font-size:48px;top:16px;right:18px;">Z</span>
+    <span class="scatter" style="font-size:32px;top:100px;left:4px;">Q</span>
+    <span class="scatter" style="font-size:52px;top:90px;right:6px;">M</span>
+    <span class="scatter" style="font-size:40px;bottom:120px;left:8px;">X</span>
+    <span class="scatter" style="font-size:36px;bottom:110px;right:10px;">B</span>
+    <span class="scatter" style="font-size:26px;bottom:60px;left:40px;">K</span>
+    <span class="scatter" style="font-size:30px;bottom:55px;right:38px;">R</span>
+    <span class="scatter" style="font-size:22px;top:180px;left:2px;">V</span>
+    <span class="scatter" style="font-size:20px;top:172px;right:4px;">Y</span>
+
+    <div class="game-inner">
+      <div class="game-header">
+        <div class="logo">Word Spin</div>
+        <button class="how-link" onclick="showHTP()">How to play</button>
+      </div>
+
+      <div class="reels-row">
+        <div class="slot-col">
+          <div class="slot-label">Starts with</div>
+          <div class="slot-window starts" id="win1">
+            <div class="fade-top"></div>
+            <div class="fade-bot"></div>
+            <div class="reel" id="reel1"></div>
+          </div>
+        </div>
+
+        <div class="connector">
+          <div class="gold-dot"></div>
+        </div>
+
+        <div class="slot-col">
+          <div class="slot-label">Ends with</div>
+          <div class="slot-window ends" id="win2">
+            <div class="fade-top"></div>
+            <div class="fade-bot"></div>
+            <div class="reel" id="reel2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt" id="prompt"></div>
+
+      <div class="timer-wrap" id="timerWrap">
+        <div class="timer-bar-bg">
+          <div class="timer-bar-fill" id="timerBar"></div>
+        </div>
+        <div class="timer-count" id="timerCount">20s</div>
+      </div>
+
+      <button class="spin-btn" id="spinBtn" onclick="startRoll()">Spin</button>
+
+      <div class="history">
+        <div class="history-title" id="histTitle">Previous rounds</div>
+        <div class="history-list" id="histList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const ITEM_H = 130;
+    let spinning = false;
+    let timerInterval = null;
+    let timeLeft = 20;
+    let roundCount = 0;
+    let history = [];
+
+    function showGame() {
+      document.getElementById('howtoplay').classList.remove('active');
+      document.getElementById('game').classList.add('active');
+    }
+
+    function showHTP() {
+      document.getElementById('game').classList.remove('active');
+      document.getElementById('howtoplay').classList.add('active');
+    }
+
+    function buildReel(el, letters) {
+      el.innerHTML = '';
+      letters.forEach(l => {
+        const d = document.createElement('div');
+        d.className = 'reel-letter';
+        d.textContent = l;
+        el.appendChild(d);
+      });
+    }
+
+    function animateReel(reelEl, finalLetter, duration, delay, onDone) {
+      const total = 44;
+      const seq = [];
+      for (let i = 0; i < total - 1; i++) seq.push(LETTERS[Math.floor(Math.random() * 26)]);
+      seq.push(finalLetter);
+      buildReel(reelEl, seq);
+      const target = -(total - 1) * ITEM_H;
+      reelEl.style.transition = 'none';
+      reelEl.style.transform = 'translateY(65px)';
+      setTimeout(() => {
+        reelEl.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.88, 0.3, 1.0)`;
+        reelEl.style.transform = `translateY(${target}px)`;
+        setTimeout(() => { if (onDone) onDone(); }, duration + 80);
+      }, delay + 30);
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 20;
+      const bar = document.getElementById('timerBar');
+      const count = document.getElementById('timerCount');
+      const wrap = document.getElementById('timerWrap');
+
+      wrap.style.opacity = '1';
+      bar.style.transition = 'none';
+      bar.style.width = '100%';
+      bar.style.background = '#f5c842';
+      count.style.color = '#f5c842';
+      count.textContent = '20s';
+
+      setTimeout(() => {
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          const pct = (timeLeft / 20) * 100;
+          bar.style.transition = 'width 1s linear, background 1s linear';
+          bar.style.width = pct + '%';
+          count.textContent = timeLeft + 's';
+
+          if (timeLeft <= 5) {
+            bar.style.background = '#e05555';
+            count.style.color = '#e05555';
+          } else if (timeLeft <= 10) {
+            bar.style.background = '#e09a30';
+            count.style.color = '#e09a30';
+          }
+
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            bar.style.width = '0%';
+            count.textContent = "Time's up!";
+          }
+        }, 1000);
+      }, 50);
+    }
+
+    function addToHistory(a, b) {
+      roundCount++;
+      history.unshift({ a, b, num: roundCount });
+      if (history.length > 8) history.pop();
+
+      const list = document.getElementById('histList');
+      const title = document.getElementById('histTitle');
+      list.innerHTML = '';
+      title.style.opacity = history.length ? '1' : '0';
+
+      history.forEach((h, i) => {
+        const row = document.createElement('div');
+        row.className = 'round-row';
+
+        const num = document.createElement('span');
+        num.className = 'round-num';
+        num.textContent = 'R' + h.num;
+
+        const pa = document.createElement('span');
+        pa.className = 'pill s';
+        pa.textContent = h.a;
+
+        const arrow = document.createElement('span');
+        arrow.className = 'pill-arrow';
+        arrow.textContent = '→';
+
+        const pb = document.createElement('span');
+        pb.className = 'pill e';
+        pb.textContent = h.b;
+
+        const lbl = document.createElement('span');
+        lbl.className = 'round-label';
+        lbl.textContent = i === 0 ? 'Latest' : '';
+
+        row.appendChild(num);
+        row.appendChild(pa);
+        row.appendChild(arrow);
+        row.appendChild(pb);
+        row.appendChild(lbl);
+        list.appendChild(row);
+      });
+    }
+
+    function startRoll() {
+      if (spinning) return;
+      spinning = true;
+      clearInterval(timerInterval);
+
+      const btn = document.getElementById('spinBtn');
+      const prompt = document.getElementById('prompt');
+      const timerWrap = document.getElementById('timerWrap');
+
+      btn.disabled = true;
+      prompt.style.opacity = '0';
+      timerWrap.style.opacity = '0';
+
+      const a = Math.floor(Math.random() * 26);
+      const b = Math.floor(Math.random() * 26);
+      const lA = LETTERS[a];
+      const lB = LETTERS[b];
+
+      animateReel(document.getElementById('reel1'), lA, 1600, 0, null);
+      animateReel(document.getElementById('reel2'), lB, 2100, 300, () => {
+        prompt.textContent = `Think of a word starting with ${lA} and ending with ${lB}!`;
+        prompt.style.opacity = '1';
+        addToHistory(lA, lB);
+        startTimer();
+        btn.disabled = false;
+        spinning = false;
+      });
+    }
+
+    buildReel(document.getElementById('reel1'), ['?']);
+    buildReel(document.getElementById('reel2'), ['?']);
+    document.getElementById('reel1').style.transform = 'translateY(0)';
+    document.getElementById('reel2').style.transform = 'translateY(0)';
+  </script>
+</body>
+</html>
